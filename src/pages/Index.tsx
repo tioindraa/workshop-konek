@@ -30,6 +30,7 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [registeredWorkshopIds, setRegisteredWorkshopIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -61,6 +62,7 @@ const Index = () => {
     if (user) {
       fetchWorkshops();
       fetchRegistrations();
+      checkAdminStatus();
     }
   }, [user]);
 
@@ -100,6 +102,23 @@ const Index = () => {
       setRegisteredWorkshopIds(ids);
     } catch (error) {
       console.error("Error fetching registrations:", error);
+    }
+  };
+
+  const checkAdminStatus = async () => {
+    if (!user) return;
+
+    try {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      setIsAdmin(!!data);
+    } catch (error) {
+      console.error("Error checking admin status:", error);
     }
   };
 
@@ -161,10 +180,17 @@ const Index = () => {
                 Platform Pendaftaran Workshop Kabupaten
               </p>
             </div>
-            <Button onClick={handleLogout} variant="outline" size="sm">
-              <LogOut className="w-4 h-4 mr-2" />
-              Keluar
-            </Button>
+            <div className="flex gap-2">
+              {isAdmin && (
+                <Button onClick={() => navigate("/admin")} variant="outline" size="sm">
+                  Admin Panel
+                </Button>
+              )}
+              <Button onClick={handleLogout} variant="outline" size="sm">
+                <LogOut className="w-4 h-4 mr-2" />
+                Keluar
+              </Button>
+            </div>
           </div>
         </div>
       </header>
