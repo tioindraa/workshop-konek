@@ -16,8 +16,10 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          address: string | null
           business_name: string | null
           business_type: string | null
+          city: string | null
           created_at: string
           full_name: string
           id: string
@@ -25,8 +27,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          address?: string | null
           business_name?: string | null
           business_type?: string | null
+          city?: string | null
           created_at?: string
           full_name: string
           id: string
@@ -34,8 +38,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          address?: string | null
           business_name?: string | null
           business_type?: string | null
+          city?: string | null
           created_at?: string
           full_name?: string
           id?: string
