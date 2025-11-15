@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, Loader2 } from "lucide-react";
+import { Calendar, MapPin, Users } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import RegistrationForm from "./RegistrationForm";
 
 interface Workshop {
   id: string;
@@ -29,7 +30,7 @@ interface WorkshopCardProps {
 
 const WorkshopCard = ({ workshop, isRegistered = false, onRegisterSuccess }: WorkshopCardProps) => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const isFull = workshop.registered_count >= workshop.capacity;
 
   const handleRegister = async () => {
@@ -43,45 +44,22 @@ const WorkshopCard = ({ workshop, isRegistered = false, onRegisterSuccess }: Wor
       return;
     }
 
-    setIsLoading(true);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast.error("Silakan login terlebih dahulu");
-        navigate("/auth");
-        return;
-      }
-
-      const { error } = await supabase
-        .from("registrations")
-        .insert({
-          user_id: user.id,
-          workshop_id: workshop.id,
-        });
-
-      if (error) {
-        if (error.code === "23505") {
-          toast.error("Anda sudah terdaftar di workshop ini");
-        } else {
-          toast.error("Gagal mendaftar workshop");
-        }
-        return;
-      }
-
-      toast.success("Berhasil mendaftar workshop!");
-      
-      if (onRegisterSuccess) {
-        onRegisterSuccess();
-      }
-      
-      navigate("/thank-you");
-    } catch (error) {
-      toast.error("Terjadi kesalahan");
-    } finally {
-      setIsLoading(false);
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast.error("Silakan login terlebih dahulu");
+      navigate("/auth");
+      return;
     }
+
+    setShowForm(true);
+  };
+
+  const handleFormSuccess = () => {
+    if (onRegisterSuccess) {
+      onRegisterSuccess();
+    }
+    navigate("/thank-you");
   };
 
   return (
@@ -131,12 +109,18 @@ const WorkshopCard = ({ workshop, isRegistered = false, onRegisterSuccess }: Wor
         <Button 
           onClick={handleRegister} 
           className="w-full"
-          disabled={isLoading || isRegistered || isFull}
+          disabled={isRegistered || isFull}
         >
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isRegistered ? "Sudah Terdaftar" : isFull ? "Kuota Penuh" : "Daftar Sekarang"}
         </Button>
       </CardFooter>
+      <RegistrationForm
+        open={showForm}
+        onOpenChange={setShowForm}
+        workshopId={workshop.id}
+        workshopTitle={workshop.title}
+        onSuccess={handleFormSuccess}
+      />
     </Card>
   );
 };
