@@ -41,6 +41,20 @@ const Index = () => {
         
         if (!session) {
           navigate("/auth");
+        } else {
+          // Check if user is admin, redirect to admin panel
+          setTimeout(async () => {
+            const { data: roleData } = await supabase
+              .from("user_roles")
+              .select("role")
+              .eq("user_id", session.user.id)
+              .eq("role", "admin")
+              .single();
+            
+            if (roleData) {
+              navigate("/admin");
+            }
+          }, 0);
         }
       }
     );
@@ -52,6 +66,20 @@ const Index = () => {
       
       if (!session) {
         navigate("/auth");
+      } else {
+        // Check if user is admin, redirect to admin panel
+        setTimeout(async () => {
+          const { data: roleData } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", session.user.id)
+            .eq("role", "admin")
+            .single();
+          
+          if (roleData) {
+            navigate("/admin");
+          }
+        }, 0);
       }
     });
 
