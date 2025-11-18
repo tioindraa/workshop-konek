@@ -246,10 +246,25 @@ const Auth = () => {
         )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 mx-6">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Daftar</TabsTrigger>
-            <TabsTrigger value="forgot">Lupa Password</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-6 bg-transparent border-b rounded-none p-0 h-auto gap-4 justify-center mx-6">
+            <TabsTrigger 
+              value="login" 
+              className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border data-[state=active]:border-primary px-6 py-2"
+            >
+              Login
+            </TabsTrigger>
+            <TabsTrigger 
+              value="signup"
+              className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border data-[state=active]:border-primary px-6 py-2"
+            >
+              Daftar
+            </TabsTrigger>
+            <TabsTrigger 
+              value="forgot"
+              className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border data-[state=active]:border-primary px-6 py-2"
+            >
+              Lupa Password
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="login">
