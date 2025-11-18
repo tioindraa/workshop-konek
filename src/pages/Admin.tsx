@@ -38,6 +38,7 @@ interface WorkshopFormData {
   location: string;
   capacity: number;
   image_url: string;
+  image_file?: File | null;
 }
 
 const Admin = () => {
@@ -54,8 +55,10 @@ const Admin = () => {
     location: "",
     capacity: 30,
     image_url: "",
+    image_file: null,
   });
   const [submitting, setSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -127,6 +130,28 @@ const Admin = () => {
     setSubmitting(true);
 
     try {
+      let imageUrl = formData.image_url;
+
+      // Upload image if a file is selected
+      if (formData.image_file) {
+        const fileExt = formData.image_file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('workshop-images')
+          .upload(filePath, formData.image_file);
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('workshop-images')
+          .getPublicUrl(filePath);
+
+        imageUrl = publicUrl;
+      }
+
       if (editingWorkshop) {
         const { error } = await supabase
           .from("workshops")
@@ -137,7 +162,7 @@ const Admin = () => {
             end_date: formData.end_date,
             location: formData.location,
             capacity: formData.capacity,
-            image_url: formData.image_url || null,
+            image_url: imageUrl || null,
           })
           .eq("id", editingWorkshop.id);
 
@@ -155,7 +180,7 @@ const Admin = () => {
           end_date: formData.end_date,
           location: formData.location,
           capacity: formData.capacity,
-          image_url: formData.image_url || null,
+          image_url: imageUrl || null,
         });
 
         if (error) throw error;
@@ -214,7 +239,9 @@ const Admin = () => {
       location: workshop.location,
       capacity: workshop.capacity,
       image_url: workshop.image_url || "",
+      image_file: null,
     });
+    setImagePreview(workshop.image_url || null);
     setIsDialogOpen(true);
   };
 
@@ -228,7 +255,21 @@ const Admin = () => {
       location: "",
       capacity: 30,
       image_url: "",
+      image_file: null,
     });
+    setImagePreview(null);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, image_file: file });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleLogout = async () => {
@@ -340,14 +381,32 @@ const Admin = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="image_url">URL Gambar (opsional)</Label>
+                  <Label htmlFor="image_file">Upload Gambar (opsional)</Label>
                   <Input
-                    id="image_url"
-                    type="url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    placeholder="https://example.com/image.jpg"
+                    id="image_file"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="cursor-pointer"
                   />
+                  {imagePreview && (
+                    <div className="mt-2">
+                      <img 
+                        src={imagePreview} 
+                        alt="Preview" 
+                        className="w-full h-48 object-cover rounded-md border"
+                      />
+                    </div>
+                  )}
+                  {editingWorkshop?.image_url && !imagePreview && (
+                    <div className="mt-2">
+                      <img 
+                        src={editingWorkshop.image_url} 
+                        alt="Current" 
+                        className="w-full h-48 object-cover rounded-md border"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="flex justify-end gap-2">
                   <Button
