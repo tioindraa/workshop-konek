@@ -212,14 +212,26 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">Portal Workshop</CardTitle>
-          <CardDescription className="text-center">
-            {activeTab === "login" && "Masuk ke akun Anda"}
-            {activeTab === "signup" && "Buat akun baru"}
-            {activeTab === "forgot" && "Reset password Anda"}
-          </CardDescription>
+      <Card className="w-full max-w-lg">
+        <CardHeader className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/")}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              ← Kembali
+            </Button>
+          </div>
+          <div>
+            <CardTitle className="text-2xl text-center">Portal Workshop</CardTitle>
+            <CardDescription className="text-center mt-2">
+              {activeTab === "login" && "Masuk ke akun Anda"}
+              {activeTab === "signup" && "Buat akun baru"}
+              {activeTab === "forgot" && "Reset password Anda"}
+            </CardDescription>
+          </div>
         </CardHeader>
         
         {activeTab === "login" && (
@@ -246,26 +258,28 @@ const Auth = () => {
         )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 mb-6 bg-transparent border-b rounded-none p-0 h-auto gap-4 justify-center mx-6">
-            <TabsTrigger 
-              value="login" 
-              className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border data-[state=active]:border-primary px-6 py-2"
-            >
-              Login
-            </TabsTrigger>
-            <TabsTrigger 
-              value="signup"
-              className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border data-[state=active]:border-primary px-6 py-2"
-            >
-              Daftar
-            </TabsTrigger>
-            <TabsTrigger 
-              value="forgot"
-              className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border data-[state=active]:border-primary px-6 py-2"
-            >
-              Lupa Password
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex justify-center px-6 mb-6">
+            <TabsList className="inline-flex bg-transparent p-0 h-auto gap-3">
+              <TabsTrigger 
+                value="login" 
+                className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border data-[state=active]:border-primary px-8 py-2.5 text-sm font-medium transition-all"
+              >
+                Login
+              </TabsTrigger>
+              <TabsTrigger 
+                value="signup"
+                className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border data-[state=active]:border-primary px-8 py-2.5 text-sm font-medium transition-all"
+              >
+                Daftar
+              </TabsTrigger>
+              <TabsTrigger 
+                value="forgot"
+                className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground border border-border data-[state=active]:border-primary px-6 py-2.5 text-sm font-medium transition-all"
+              >
+                Lupa Password
+              </TabsTrigger>
+            </TabsList>
+          </div>
           
           <TabsContent value="login">
             <form onSubmit={handleLogin}>
