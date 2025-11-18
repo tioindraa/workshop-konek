@@ -102,7 +102,7 @@ const Landing = () => {
       {/* Footer */}
       <footer className="bg-card py-8 border-t">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; 2024 Portal Workshop UMKM Kabupaten Kediri. All rights reserved.</p>
+          <p>&copy; 2025 Portal Workshop UMKM Kabupaten Kediri. All rights reserved.</p>
         </div>
       </footer>
     </div>
