@@ -31,6 +31,7 @@ const Index = () => {
   const [registeredWorkshopIds, setRegisteredWorkshopIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showOnlyRegistered, setShowOnlyRegistered] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -96,7 +97,7 @@ const Index = () => {
 
   useEffect(() => {
     filterWorkshops();
-  }, [searchQuery, workshops]);
+  }, [searchQuery, workshops, showOnlyRegistered, registeredWorkshopIds]);
 
   const fetchWorkshops = async () => {
     try {
@@ -151,19 +152,24 @@ const Index = () => {
   };
 
   const filterWorkshops = () => {
-    if (!searchQuery.trim()) {
-      setFilteredWorkshops(workshops);
-      return;
+    let filtered = workshops;
+
+    // Filter by registered workshops if enabled
+    if (showOnlyRegistered) {
+      filtered = filtered.filter(workshop => registeredWorkshopIds.has(workshop.id));
     }
 
-    const query = searchQuery.toLowerCase();
-    const filtered = workshops.filter((workshop) => {
-      const titleMatch = workshop.title.toLowerCase().includes(query);
-      const dateMatch = new Date(workshop.start_date)
-        .toLocaleDateString("id-ID")
-        .includes(query);
-      return titleMatch || dateMatch;
-    });
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((workshop) => {
+        const titleMatch = workshop.title.toLowerCase().includes(query);
+        const dateMatch = new Date(workshop.start_date)
+          .toLocaleDateString("id-ID")
+          .includes(query);
+        return titleMatch || dateMatch;
+      });
+    }
 
     setFilteredWorkshops(filtered);
   };
@@ -254,35 +260,51 @@ const Index = () => {
         </Card>
 
         {/* Workshop Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <Card className="p-4 text-center bg-primary/5 border-primary/20">
             <p className="text-3xl font-bold text-primary">{workshops.length}</p>
             <p className="text-sm text-muted-foreground">Total Workshop</p>
           </Card>
-          <Card className="p-4 text-center bg-secondary/5 border-secondary/20">
+          <Card 
+            className={`p-4 text-center cursor-pointer transition-all ${
+              showOnlyRegistered 
+                ? 'bg-secondary border-secondary ring-2 ring-secondary' 
+                : 'bg-secondary/5 border-secondary/20 hover:bg-secondary/10'
+            }`}
+            onClick={() => setShowOnlyRegistered(!showOnlyRegistered)}
+          >
             <p className="text-3xl font-bold text-secondary">{registeredWorkshopIds.size}</p>
-            <p className="text-sm text-muted-foreground">Workshop Terdaftar</p>
-          </Card>
-          <Card className="p-4 text-center bg-accent/5 border-accent/20">
-            <p className="text-3xl font-bold text-accent">
-              {workshops.filter(w => new Date(w.start_date) > new Date()).length}
+            <p className="text-sm text-muted-foreground">
+              {showOnlyRegistered ? 'Lihat Semua Workshop' : 'Workshop Terdaftar (Klik untuk lihat)'}
             </p>
-            <p className="text-sm text-muted-foreground">Workshop Mendatang</p>
           </Card>
         </div>
 
         {/* Workshops Grid */}
-        <div className="mb-6 flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-primary" />
-          <h3 className="text-xl font-semibold">
-            Daftar Workshop Tersedia
-          </h3>
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-primary" />
+            <h3 className="text-xl font-semibold">
+              {showOnlyRegistered ? 'Workshop yang Anda Daftarkan' : 'Daftar Workshop Tersedia'}
+            </h3>
+          </div>
+          {showOnlyRegistered && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowOnlyRegistered(false)}
+            >
+              Lihat Semua
+            </Button>
+          )}
         </div>
 
         {filteredWorkshops.length === 0 ? (
           <Card className="p-8 text-center">
             <p className="text-muted-foreground">
-              {searchQuery
+              {showOnlyRegistered
+                ? "Anda belum mendaftar workshop apapun"
+                : searchQuery
                 ? "Tidak ada workshop yang sesuai dengan pencarian"
                 : "Belum ada workshop tersedia"}
             </p>

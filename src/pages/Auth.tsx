@@ -238,7 +238,7 @@ const Auth = () => {
         </CardHeader>
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          {activeTab !== "forgot" && (
+          {loginType !== "admin" && activeTab !== "forgot" && (
             <div className="flex justify-center px-6 mb-6">
               <TabsList className="inline-flex bg-transparent p-0 h-auto gap-3">
                 <TabsTrigger 
