@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,9 +32,10 @@ const forgotPasswordSchema = z.object({
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
-  const [loginType, setLoginType] = useState<"user" | "admin">("user");
+  const loginType = searchParams.get("type") === "admin" ? "admin" : "user";
 
   // Login form
   const [loginEmail, setLoginEmail] = useState("");
@@ -225,37 +226,16 @@ const Auth = () => {
             </Button>
           </div>
           <div>
-            <CardTitle className="text-2xl text-center">Portal Workshop</CardTitle>
+            <CardTitle className="text-2xl text-center">
+              {loginType === "admin" ? "Admin Portal" : "Portal Workshop"}
+            </CardTitle>
             <CardDescription className="text-center mt-2">
-              {activeTab === "login" && "Masuk ke akun Anda"}
+              {activeTab === "login" && (loginType === "admin" ? "Masuk sebagai admin" : "Masuk ke akun Anda")}
               {activeTab === "signup" && "Buat akun baru"}
               {activeTab === "forgot" && "Reset password Anda"}
             </CardDescription>
           </div>
         </CardHeader>
-        
-        {activeTab === "login" && (
-          <div className="px-6 pb-4">
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant={loginType === "user" ? "default" : "outline"}
-                className="flex-1"
-                onClick={() => setLoginType("user")}
-              >
-                Login User
-              </Button>
-              <Button
-                type="button"
-                variant={loginType === "admin" ? "default" : "outline"}
-                className="flex-1"
-                onClick={() => setLoginType("admin")}
-              >
-                Login Admin
-              </Button>
-            </div>
-          </div>
-        )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           {activeTab !== "forgot" && (
