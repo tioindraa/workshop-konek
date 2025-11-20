@@ -285,7 +285,7 @@ const Index = () => {
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-primary" />
             <h3 className="text-xl font-semibold">
-              {showOnlyRegistered ? 'Workshop yang Anda Daftarkan' : 'Daftar Workshop Tersedia'}
+              {showOnlyRegistered ? 'Workshop yang Anda Daftarkan' : 'Workshop Tersedia'}
             </h3>
           </div>
           {showOnlyRegistered && (
