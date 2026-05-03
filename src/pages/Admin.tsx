@@ -43,9 +43,20 @@ interface WorkshopFormData {
   image_file?: File | null;
 }
 
+interface Registrant {
+  registration_id: string;
+  workshop_id: string;
+  workshop_title: string;
+  registered_at: string;
+  status: string;
+  user_id: string;
+  profile: any;
+}
+
 const Admin = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [registrants, setRegistrants] = useState<Registrant[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
@@ -71,6 +82,18 @@ const Admin = () => {
   useEffect(() => {
     if (isAdmin === true) {
       fetchWorkshops();
+      fetchRegistrants();
+
+      const channel = supabase
+        .channel("admin-realtime")
+        .on("postgres_changes", { event: "*", schema: "public", table: "registrations" }, () => fetchRegistrants())
+        .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchRegistrants())
+        .on("postgres_changes", { event: "*", schema: "public", table: "workshops" }, () => fetchWorkshops())
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     } else if (isAdmin === false) {
       navigate("/");
       toast({
