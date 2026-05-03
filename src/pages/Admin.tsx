@@ -588,6 +588,59 @@ const Admin = () => {
             </Card>
           )}
         </div>
+          </TabsContent>
+
+          <TabsContent value="registrants">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-foreground">Database Pendaftar (Realtime)</h2>
+              <Button onClick={exportRegistrantsCSV}>
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tanggal</TableHead>
+                      <TableHead>Workshop</TableHead>
+                      <TableHead>Nama Pemilik</TableHead>
+                      <TableHead>NIK</TableHead>
+                      <TableHead>No Telp/WA</TableHead>
+                      <TableHead>Nama Usaha</TableHead>
+                      <TableHead>Bidang Usaha</TableHead>
+                      <TableHead>Desa/Kecamatan</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {registrants.map((r) => (
+                      <TableRow key={r.registration_id}>
+                        <TableCell className="whitespace-nowrap">{format(new Date(r.registered_at), "dd/MM/yy HH:mm")}</TableCell>
+                        <TableCell>{r.workshop_title}</TableCell>
+                        <TableCell>{r.profile?.full_name || "-"}</TableCell>
+                        <TableCell>{r.profile?.nik || "-"}</TableCell>
+                        <TableCell>{r.profile?.phone_number || "-"}</TableCell>
+                        <TableCell>{r.profile?.nama_usaha || "-"}</TableCell>
+                        <TableCell>{r.profile?.bidang_usaha || "-"}</TableCell>
+                        <TableCell>{[r.profile?.desa, r.profile?.kecamatan].filter(Boolean).join(", ") || "-"}</TableCell>
+                        <TableCell>{r.status}</TableCell>
+                      </TableRow>
+                    ))}
+                    {registrants.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                          Belum ada pendaftar.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
