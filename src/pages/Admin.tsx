@@ -398,6 +398,13 @@ const Admin = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="workshops" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="workshops">Workshop</TabsTrigger>
+            <TabsTrigger value="registrants">Pendaftar ({registrants.length})</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="workshops">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-foreground">Daftar Workshop</h2>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
