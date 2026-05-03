@@ -7,7 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Edit2, Trash2, LogOut } from "lucide-react";
+import { Loader2, Plus, Edit2, Trash2, LogOut, Download } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -41,9 +43,20 @@ interface WorkshopFormData {
   image_file?: File | null;
 }
 
+interface Registrant {
+  registration_id: string;
+  workshop_id: string;
+  workshop_title: string;
+  registered_at: string;
+  status: string;
+  user_id: string;
+  profile: any;
+}
+
 const Admin = () => {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [workshops, setWorkshops] = useState<Workshop[]>([]);
+  const [registrants, setRegistrants] = useState<Registrant[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingWorkshop, setEditingWorkshop] = useState<Workshop | null>(null);
@@ -69,6 +82,18 @@ const Admin = () => {
   useEffect(() => {
     if (isAdmin === true) {
       fetchWorkshops();
+      fetchRegistrants();
+
+      const channel = supabase
+        .channel("admin-realtime")
+        .on("postgres_changes", { event: "*", schema: "public", table: "registrations" }, () => fetchRegistrants())
+        .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => fetchRegistrants())
+        .on("postgres_changes", { event: "*", schema: "public", table: "workshops" }, () => fetchWorkshops())
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     } else if (isAdmin === false) {
       navigate("/");
       toast({
@@ -123,6 +148,81 @@ const Admin = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchRegistrants = async () => {
+    try {
+      const { data: regs, error } = await supabase
+        .from("registrations")
+        .select("id, workshop_id, registered_at, status, user_id, workshops(title)")
+        .order("registered_at", { ascending: false });
+      if (error) throw error;
+
+      const userIds = Array.from(new Set((regs || []).map((r: any) => r.user_id)));
+      let profilesMap: Record<string, any> = {};
+      if (userIds.length > 0) {
+        const { data: profs } = await supabase.from("profiles").select("*").in("id", userIds);
+        profilesMap = Object.fromEntries((profs || []).map((p: any) => [p.id, p]));
+      }
+
+      setRegistrants(
+        (regs || []).map((r: any) => ({
+          registration_id: r.id,
+          workshop_id: r.workshop_id,
+          workshop_title: r.workshops?.title || "-",
+          registered_at: r.registered_at,
+          status: r.status,
+          user_id: r.user_id,
+          profile: profilesMap[r.user_id] || {},
+        }))
+      );
+    } catch (e) {
+      console.error("Error fetching registrants:", e);
+    }
+  };
+
+  const exportRegistrantsCSV = () => {
+    if (registrants.length === 0) {
+      toast({ title: "Tidak ada data", description: "Belum ada pendaftar untuk di-export.", variant: "destructive" });
+      return;
+    }
+    const headers = [
+      "Workshop", "Tanggal Daftar", "Status",
+      "Nama Pemilik", "NIK", "Bidang Usaha", "No Telp/WA",
+      "Desa", "Kecamatan", "Alamat Lengkap",
+      "Nama Usaha", "Produk", "Tahun Berdiri", "Perizinan",
+      "Bantuan/Fasilitasi", "Kegiatan Dinas Pernah", "Kegiatan Dinas Sekarang",
+      "Paguyuban", "Modal Awal", "Tenaga Kerja", "Kapasitas Produksi",
+      "Harga per Unit", "Media Pemasaran Online", "Daerah Pemasaran Offline",
+      "Omzet/Bulan", "Kesulitan Usaha", "Pelatihan Diharapkan",
+      "Akses Permodalan", "Info Ekspor",
+    ];
+    const escape = (v: any) => {
+      const s = Array.isArray(v) ? v.join("; ") : v == null ? "" : String(v);
+      return `"${s.replace(/"/g, '""')}"`;
+    };
+    const rows = registrants.map((r) => {
+      const p = r.profile || {};
+      return [
+        r.workshop_title, format(new Date(r.registered_at), "dd/MM/yyyy HH:mm"), r.status,
+        p.full_name, p.nik, p.bidang_usaha, p.phone_number,
+        p.desa, p.kecamatan, p.alamat_lengkap,
+        p.nama_usaha, p.produk_dihasilkan, p.tahun_berdiri, p.perizinan,
+        p.bantuan_fasilitasi, p.kegiatan_dinas_pernah, p.kegiatan_dinas_sekarang,
+        p.paguyuban, p.modal_awal, p.jumlah_tenaga_kerja, p.kapasitas_produksi,
+        p.harga_per_unit, p.media_pemasaran_online, p.daerah_pemasaran_offline,
+        p.jumlah_penjualan, p.kesulitan_usaha, p.pelatihan_diharapkan,
+        p.akses_permodalan, p.info_ekspor,
+      ].map(escape).join(",");
+    });
+    const csv = "\ufeff" + [headers.map(escape).join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `pendaftar-workshop-${format(new Date(), "yyyyMMdd-HHmm")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -298,6 +398,13 @@ const Admin = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="workshops" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="workshops">Workshop</TabsTrigger>
+            <TabsTrigger value="registrants">Pendaftar ({registrants.length})</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="workshops">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-foreground">Daftar Workshop</h2>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -481,6 +588,59 @@ const Admin = () => {
             </Card>
           )}
         </div>
+          </TabsContent>
+
+          <TabsContent value="registrants">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-foreground">Database Pendaftar (Realtime)</h2>
+              <Button onClick={exportRegistrantsCSV}>
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tanggal</TableHead>
+                      <TableHead>Workshop</TableHead>
+                      <TableHead>Nama Pemilik</TableHead>
+                      <TableHead>NIK</TableHead>
+                      <TableHead>No Telp/WA</TableHead>
+                      <TableHead>Nama Usaha</TableHead>
+                      <TableHead>Bidang Usaha</TableHead>
+                      <TableHead>Desa/Kecamatan</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {registrants.map((r) => (
+                      <TableRow key={r.registration_id}>
+                        <TableCell className="whitespace-nowrap">{format(new Date(r.registered_at), "dd/MM/yy HH:mm")}</TableCell>
+                        <TableCell>{r.workshop_title}</TableCell>
+                        <TableCell>{r.profile?.full_name || "-"}</TableCell>
+                        <TableCell>{r.profile?.nik || "-"}</TableCell>
+                        <TableCell>{r.profile?.phone_number || "-"}</TableCell>
+                        <TableCell>{r.profile?.nama_usaha || "-"}</TableCell>
+                        <TableCell>{r.profile?.bidang_usaha || "-"}</TableCell>
+                        <TableCell>{[r.profile?.desa, r.profile?.kecamatan].filter(Boolean).join(", ") || "-"}</TableCell>
+                        <TableCell>{r.status}</TableCell>
+                      </TableRow>
+                    ))}
+                    {registrants.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                          Belum ada pendaftar.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
