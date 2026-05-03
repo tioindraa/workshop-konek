@@ -225,6 +225,7 @@ const Admin = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
 
