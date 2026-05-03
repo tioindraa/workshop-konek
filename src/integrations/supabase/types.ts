@@ -17,35 +17,107 @@ export type Database = {
       profiles: {
         Row: {
           address: string | null
+          akses_permodalan: string | null
+          alamat_lengkap: string | null
+          bantuan_fasilitasi: string | null
+          bidang_usaha: string | null
           business_name: string | null
           business_type: string | null
           city: string | null
           created_at: string
+          daerah_pemasaran_offline: string | null
+          desa: string | null
           full_name: string
+          harga_per_unit: string | null
           id: string
+          info_ekspor: string | null
+          jumlah_penjualan: string | null
+          jumlah_tenaga_kerja: string | null
+          kapasitas_produksi: string | null
+          kecamatan: string | null
+          kegiatan_dinas_pernah: string | null
+          kegiatan_dinas_sekarang: string | null
+          kesulitan_usaha: string | null
+          media_pemasaran_online: string[] | null
+          modal_awal: string | null
+          nama_usaha: string | null
+          nik: string | null
+          paguyuban: string | null
+          pelatihan_diharapkan: string | null
+          perizinan: string[] | null
           phone_number: string | null
+          produk_dihasilkan: string | null
+          tahun_berdiri: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
+          akses_permodalan?: string | null
+          alamat_lengkap?: string | null
+          bantuan_fasilitasi?: string | null
+          bidang_usaha?: string | null
           business_name?: string | null
           business_type?: string | null
           city?: string | null
           created_at?: string
+          daerah_pemasaran_offline?: string | null
+          desa?: string | null
           full_name: string
+          harga_per_unit?: string | null
           id: string
+          info_ekspor?: string | null
+          jumlah_penjualan?: string | null
+          jumlah_tenaga_kerja?: string | null
+          kapasitas_produksi?: string | null
+          kecamatan?: string | null
+          kegiatan_dinas_pernah?: string | null
+          kegiatan_dinas_sekarang?: string | null
+          kesulitan_usaha?: string | null
+          media_pemasaran_online?: string[] | null
+          modal_awal?: string | null
+          nama_usaha?: string | null
+          nik?: string | null
+          paguyuban?: string | null
+          pelatihan_diharapkan?: string | null
+          perizinan?: string[] | null
           phone_number?: string | null
+          produk_dihasilkan?: string | null
+          tahun_berdiri?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
+          akses_permodalan?: string | null
+          alamat_lengkap?: string | null
+          bantuan_fasilitasi?: string | null
+          bidang_usaha?: string | null
           business_name?: string | null
           business_type?: string | null
           city?: string | null
           created_at?: string
+          daerah_pemasaran_offline?: string | null
+          desa?: string | null
           full_name?: string
+          harga_per_unit?: string | null
           id?: string
+          info_ekspor?: string | null
+          jumlah_penjualan?: string | null
+          jumlah_tenaga_kerja?: string | null
+          kapasitas_produksi?: string | null
+          kecamatan?: string | null
+          kegiatan_dinas_pernah?: string | null
+          kegiatan_dinas_sekarang?: string | null
+          kesulitan_usaha?: string | null
+          media_pemasaran_online?: string[] | null
+          modal_awal?: string | null
+          nama_usaha?: string | null
+          nik?: string | null
+          paguyuban?: string | null
+          pelatihan_diharapkan?: string | null
+          perizinan?: string[] | null
           phone_number?: string | null
+          produk_dihasilkan?: string | null
+          tahun_berdiri?: string | null
           updated_at?: string
         }
         Relationships: []
