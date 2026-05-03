@@ -150,7 +150,81 @@ const Admin = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const fetchRegistrants = async () => {
+    try {
+      const { data: regs, error } = await supabase
+        .from("registrations")
+        .select("id, workshop_id, registered_at, status, user_id, workshops(title)")
+        .order("registered_at", { ascending: false });
+      if (error) throw error;
+
+      const userIds = Array.from(new Set((regs || []).map((r: any) => r.user_id)));
+      let profilesMap: Record<string, any> = {};
+      if (userIds.length > 0) {
+        const { data: profs } = await supabase.from("profiles").select("*").in("id", userIds);
+        profilesMap = Object.fromEntries((profs || []).map((p: any) => [p.id, p]));
+      }
+
+      setRegistrants(
+        (regs || []).map((r: any) => ({
+          registration_id: r.id,
+          workshop_id: r.workshop_id,
+          workshop_title: r.workshops?.title || "-",
+          registered_at: r.registered_at,
+          status: r.status,
+          user_id: r.user_id,
+          profile: profilesMap[r.user_id] || {},
+        }))
+      );
+    } catch (e) {
+      console.error("Error fetching registrants:", e);
+    }
+  };
+
+  const exportRegistrantsCSV = () => {
+    if (registrants.length === 0) {
+      toast({ title: "Tidak ada data", description: "Belum ada pendaftar untuk di-export.", variant: "destructive" });
+      return;
+    }
+    const headers = [
+      "Workshop", "Tanggal Daftar", "Status",
+      "Nama Pemilik", "NIK", "Bidang Usaha", "No Telp/WA",
+      "Desa", "Kecamatan", "Alamat Lengkap",
+      "Nama Usaha", "Produk", "Tahun Berdiri", "Perizinan",
+      "Bantuan/Fasilitasi", "Kegiatan Dinas Pernah", "Kegiatan Dinas Sekarang",
+      "Paguyuban", "Modal Awal", "Tenaga Kerja", "Kapasitas Produksi",
+      "Harga per Unit", "Media Pemasaran Online", "Daerah Pemasaran Offline",
+      "Omzet/Bulan", "Kesulitan Usaha", "Pelatihan Diharapkan",
+      "Akses Permodalan", "Info Ekspor",
+    ];
+    const escape = (v: any) => {
+      const s = Array.isArray(v) ? v.join("; ") : v == null ? "" : String(v);
+      return `"${s.replace(/"/g, '""')}"`;
+    };
+    const rows = registrants.map((r) => {
+      const p = r.profile || {};
+      return [
+        r.workshop_title, format(new Date(r.registered_at), "dd/MM/yyyy HH:mm"), r.status,
+        p.full_name, p.nik, p.bidang_usaha, p.phone_number,
+        p.desa, p.kecamatan, p.alamat_lengkap,
+        p.nama_usaha, p.produk_dihasilkan, p.tahun_berdiri, p.perizinan,
+        p.bantuan_fasilitasi, p.kegiatan_dinas_pernah, p.kegiatan_dinas_sekarang,
+        p.paguyuban, p.modal_awal, p.jumlah_tenaga_kerja, p.kapasitas_produksi,
+        p.harga_per_unit, p.media_pemasaran_online, p.daerah_pemasaran_offline,
+        p.jumlah_penjualan, p.kesulitan_usaha, p.pelatihan_diharapkan,
+        p.akses_permodalan, p.info_ekspor,
+      ].map(escape).join(",");
+    });
+    const csv = "\ufeff" + [headers.map(escape).join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `pendaftar-workshop-${format(new Date(), "yyyyMMdd-HHmm")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
     e.preventDefault();
     setSubmitting(true);
 
