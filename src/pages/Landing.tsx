@@ -11,15 +11,6 @@ const Landing = () => {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h2 className="text-xl font-bold text-foreground">Portal Workshop UMKM</h2>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate("/auth?type=admin")}
-            className="gap-2"
-          >
-            <Shield className="w-4 h-4" />
-            Login Admin
-          </Button>
         </div>
       </header>
 
