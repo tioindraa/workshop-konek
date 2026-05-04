@@ -203,18 +203,55 @@ const Auth = () => {
     try {
       const validatedData = forgotPasswordSchema.parse({ email: forgotEmail });
       setIsLoading(true);
-      const { error } = await supabase.auth.resetPasswordForEmail(validatedData.email, {
-        redirectTo: `${window.location.origin}/auth`,
+      const { error } = await supabase.auth.signInWithOtp({
+        email: validatedData.email,
+        options: { shouldCreateUser: false },
       });
       if (error) {
         toast.error(error.message);
         return;
       }
-      toast.success("Email reset password telah dikirim!");
-      setForgotEmail("");
+      toast.success("Kode OTP telah dikirim ke email Anda!");
+      setForgotStep("otp");
     } catch (error) {
       if (error instanceof z.ZodError) toast.error(error.errors[0].message);
       else toast.error("Terjadi kesalahan");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtpAndReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otpCode.length !== 6) return toast.error("Kode OTP harus 6 digit");
+    if (newPassword.length < 6) return toast.error("Password minimal 6 karakter");
+    if (newPassword !== confirmNewPassword) return toast.error("Password tidak cocok");
+    try {
+      setIsLoading(true);
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email: forgotEmail,
+        token: otpCode,
+        type: "email",
+      });
+      if (verifyError) {
+        toast.error("Kode OTP tidak valid atau sudah kedaluwarsa");
+        return;
+      }
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+      if (updateError) {
+        toast.error(updateError.message);
+        return;
+      }
+      await supabase.auth.signOut();
+      toast.success("Password berhasil direset! Silakan login.");
+      setForgotEmail("");
+      setOtpCode("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setForgotStep("email");
+      setActiveTab("login");
+    } catch {
+      toast.error("Terjadi kesalahan");
     } finally {
       setIsLoading(false);
     }
