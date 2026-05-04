@@ -66,6 +66,10 @@ const Auth = () => {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotStep, setForgotStep] = useState<"email" | "otp">("email");
+  const [otpCode, setOtpCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [signup, setSignup] = useState(initialSignup);
 
   const updateSignup = (key: keyof typeof initialSignup, value: any) =>
@@ -199,18 +203,55 @@ const Auth = () => {
     try {
       const validatedData = forgotPasswordSchema.parse({ email: forgotEmail });
       setIsLoading(true);
-      const { error } = await supabase.auth.resetPasswordForEmail(validatedData.email, {
-        redirectTo: `${window.location.origin}/auth`,
+      const { error } = await supabase.auth.signInWithOtp({
+        email: validatedData.email,
+        options: { shouldCreateUser: false },
       });
       if (error) {
         toast.error(error.message);
         return;
       }
-      toast.success("Email reset password telah dikirim!");
-      setForgotEmail("");
+      toast.success("Kode OTP telah dikirim ke email Anda!");
+      setForgotStep("otp");
     } catch (error) {
       if (error instanceof z.ZodError) toast.error(error.errors[0].message);
       else toast.error("Terjadi kesalahan");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtpAndReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otpCode.length !== 6) return toast.error("Kode OTP harus 6 digit");
+    if (newPassword.length < 6) return toast.error("Password minimal 6 karakter");
+    if (newPassword !== confirmNewPassword) return toast.error("Password tidak cocok");
+    try {
+      setIsLoading(true);
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email: forgotEmail,
+        token: otpCode,
+        type: "email",
+      });
+      if (verifyError) {
+        toast.error("Kode OTP tidak valid atau sudah kedaluwarsa");
+        return;
+      }
+      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+      if (updateError) {
+        toast.error(updateError.message);
+        return;
+      }
+      await supabase.auth.signOut();
+      toast.success("Password berhasil direset! Silakan login.");
+      setForgotEmail("");
+      setOtpCode("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setForgotStep("email");
+      setActiveTab("login");
+    } catch {
+      toast.error("Terjadi kesalahan");
     } finally {
       setIsLoading(false);
     }
@@ -431,34 +472,97 @@ const Auth = () => {
           </TabsContent>
 
           <TabsContent value="forgot">
-            <form onSubmit={handleForgotPassword}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="forgot-email">Email</Label>
-                  <Input
-                    id="forgot-email"
-                    type="email"
-                    placeholder="nama@example.com"
-                    value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
-                    disabled={isLoading}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Kirim Email Reset
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="w-full"
-                  onClick={() => setActiveTab("login")}
-                >
-                  Kembali ke Login
-                </Button>
-              </CardContent>
-            </form>
+            {forgotStep === "email" ? (
+              <form onSubmit={handleForgotPassword}>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email">Email</Label>
+                    <Input
+                      id="forgot-email"
+                      type="email"
+                      placeholder="nama@example.com"
+                      value={forgotEmail}
+                      onChange={(e) => setForgotEmail(e.target.value)}
+                      disabled={isLoading}
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Kami akan mengirim kode OTP 6 digit ke email Anda.
+                    </p>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Kirim Kode OTP
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => setActiveTab("login")}
+                  >
+                    Kembali ke Login
+                  </Button>
+                </CardContent>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyOtpAndReset}>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Kode OTP</Label>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      placeholder="123456"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
+                      disabled={isLoading}
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Kode OTP dikirim ke {forgotEmail}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Password Baru</Label>
+                    <Input
+                      type="password"
+                      placeholder="••••••"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      disabled={isLoading}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Konfirmasi Password Baru</Label>
+                    <Input
+                      type="password"
+                      placeholder="••••••"
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      disabled={isLoading}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Verifikasi & Reset Password
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="w-full"
+                    onClick={() => {
+                      setForgotStep("email");
+                      setOtpCode("");
+                    }}
+                  >
+                    Kirim Ulang / Ganti Email
+                  </Button>
+                </CardContent>
+              </form>
+            )}
           </TabsContent>
         </Tabs>
       </Card>
