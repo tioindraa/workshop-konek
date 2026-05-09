@@ -610,7 +610,7 @@ const Admin = () => {
                       <TableHead className="whitespace-nowrap">NIK</TableHead>
                       <TableHead className="whitespace-nowrap">Bidang Usaha</TableHead>
                       <TableHead className="whitespace-nowrap">No Telp / WA</TableHead>
-                      <TableHead className="whitespace-nowrap">Email</TableHead>
+                      
                       <TableHead className="whitespace-nowrap">Desa</TableHead>
                       <TableHead className="whitespace-nowrap">Kecamatan</TableHead>
                       <TableHead className="whitespace-nowrap">Alamat Lengkap</TableHead>
