@@ -652,7 +652,7 @@ const Admin = () => {
                           <TableCell className="whitespace-nowrap">{fmt(p.nik)}</TableCell>
                           <TableCell className="whitespace-nowrap">{fmt(p.bidang_usaha)}</TableCell>
                           <TableCell className="whitespace-nowrap">{fmt(p.phone_number)}</TableCell>
-                          <TableCell className="whitespace-nowrap">{fmt(p.email)}</TableCell>
+                          
                           <TableCell className="whitespace-nowrap">{fmt(p.desa)}</TableCell>
                           <TableCell className="whitespace-nowrap">{fmt(p.kecamatan)}</TableCell>
                           <TableCell className="max-w-[260px] whitespace-normal">{fmt(p.alamat_lengkap)}</TableCell>
