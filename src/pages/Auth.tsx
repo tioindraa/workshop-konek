@@ -148,44 +148,40 @@ const Auth = () => {
         password: signup.password,
         options: {
           emailRedirectTo: `${window.location.origin}/workshops`,
-          data: { full_name: signup.fullName, phone_number: signup.phone },
+          data: {
+            full_name: signup.fullName,
+            phone_number: signup.phone,
+            nik: signup.nik,
+            bidang_usaha: signup.bidangUsaha,
+            desa: signup.desa,
+            kecamatan: signup.kecamatan,
+            alamat_lengkap: signup.alamatLengkap,
+            nama_usaha: signup.namaUsaha,
+            produk_dihasilkan: signup.produkDihasilkan,
+            tahun_berdiri: signup.tahunBerdiri,
+            perizinan: signup.perizinan,
+            bantuan_fasilitasi: signup.bantuanFasilitasi,
+            kegiatan_dinas_pernah: signup.kegiatanDinasPernah,
+            kegiatan_dinas_sekarang: signup.kegiatanDinasSekarang,
+            paguyuban: signup.paguyuban,
+            modal_awal: signup.modalAwal,
+            jumlah_tenaga_kerja: signup.jumlahTenagaKerja,
+            kapasitas_produksi: signup.kapasitasProduksi,
+            harga_per_unit: signup.hargaPerUnit,
+            media_pemasaran_online: signup.mediaPemasaranOnline,
+            daerah_pemasaran_offline: signup.daerahPemasaranOffline,
+            jumlah_penjualan: signup.jumlahPenjualan,
+            kesulitan_usaha: signup.kesulitanUsaha,
+            pelatihan_diharapkan: signup.pelatihanDiharapkan,
+            akses_permodalan: signup.aksesPermodalan,
+            info_ekspor: signup.infoEkspor,
+          },
         },
       });
       if (error) {
         if (error.message.includes("already registered")) toast.error("Email sudah terdaftar");
         else toast.error(error.message);
         return;
-      }
-
-      if (data.user) {
-        await supabase.from("profiles").update({
-          full_name: signup.fullName,
-          phone_number: signup.phone,
-          nik: signup.nik,
-          bidang_usaha: signup.bidangUsaha,
-          desa: signup.desa,
-          kecamatan: signup.kecamatan,
-          alamat_lengkap: signup.alamatLengkap,
-          nama_usaha: signup.namaUsaha,
-          produk_dihasilkan: signup.produkDihasilkan,
-          tahun_berdiri: signup.tahunBerdiri,
-          perizinan: signup.perizinan,
-          bantuan_fasilitasi: signup.bantuanFasilitasi,
-          kegiatan_dinas_pernah: signup.kegiatanDinasPernah,
-          kegiatan_dinas_sekarang: signup.kegiatanDinasSekarang,
-          paguyuban: signup.paguyuban,
-          modal_awal: signup.modalAwal,
-          jumlah_tenaga_kerja: signup.jumlahTenagaKerja,
-          kapasitas_produksi: signup.kapasitasProduksi,
-          harga_per_unit: signup.hargaPerUnit,
-          media_pemasaran_online: signup.mediaPemasaranOnline,
-          daerah_pemasaran_offline: signup.daerahPemasaranOffline,
-          jumlah_penjualan: signup.jumlahPenjualan,
-          kesulitan_usaha: signup.kesulitanUsaha,
-          pelatihan_diharapkan: signup.pelatihanDiharapkan,
-          akses_permodalan: signup.aksesPermodalan,
-          info_ekspor: signup.infoEkspor,
-        }).eq("id", data.user.id);
       }
 
       toast.success("Registrasi berhasil! Silakan login.");
