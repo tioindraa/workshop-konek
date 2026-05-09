@@ -599,38 +599,88 @@ const Admin = () => {
               </Button>
             </div>
             <Card>
-              <CardContent className="p-0">
+              <CardContent className="p-0 overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Tanggal</TableHead>
-                      <TableHead>Workshop</TableHead>
-                      <TableHead>Nama Pemilik</TableHead>
-                      <TableHead>NIK</TableHead>
-                      <TableHead>No Telp/WA</TableHead>
-                      <TableHead>Nama Usaha</TableHead>
-                      <TableHead>Bidang Usaha</TableHead>
-                      <TableHead>Desa/Kecamatan</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead className="whitespace-nowrap">Tanggal Daftar</TableHead>
+                      <TableHead className="whitespace-nowrap">Workshop</TableHead>
+                      <TableHead className="whitespace-nowrap">Status</TableHead>
+                      <TableHead className="whitespace-nowrap">Nama Pemilik (KTP)</TableHead>
+                      <TableHead className="whitespace-nowrap">NIK</TableHead>
+                      <TableHead className="whitespace-nowrap">Bidang Usaha</TableHead>
+                      <TableHead className="whitespace-nowrap">No Telp / WA</TableHead>
+                      <TableHead className="whitespace-nowrap">Email</TableHead>
+                      <TableHead className="whitespace-nowrap">Desa</TableHead>
+                      <TableHead className="whitespace-nowrap">Kecamatan</TableHead>
+                      <TableHead className="whitespace-nowrap">Alamat Lengkap</TableHead>
+                      <TableHead className="whitespace-nowrap">Nama Usaha / Merek</TableHead>
+                      <TableHead className="whitespace-nowrap">Produk Dihasilkan</TableHead>
+                      <TableHead className="whitespace-nowrap">Tahun Berdiri</TableHead>
+                      <TableHead className="whitespace-nowrap">Perizinan</TableHead>
+                      <TableHead className="whitespace-nowrap">Bantuan / Fasilitasi</TableHead>
+                      <TableHead className="whitespace-nowrap">Kegiatan Dinas (Pernah)</TableHead>
+                      <TableHead className="whitespace-nowrap">Kegiatan Dinas (Sekarang)</TableHead>
+                      <TableHead className="whitespace-nowrap">Paguyuban</TableHead>
+                      <TableHead className="whitespace-nowrap">Modal Awal</TableHead>
+                      <TableHead className="whitespace-nowrap">Tenaga Kerja</TableHead>
+                      <TableHead className="whitespace-nowrap">Kapasitas Produksi/Bulan</TableHead>
+                      <TableHead className="whitespace-nowrap">Harga per Unit/Pcs/Kg</TableHead>
+                      <TableHead className="whitespace-nowrap">Media Pemasaran Online</TableHead>
+                      <TableHead className="whitespace-nowrap">Daerah Pemasaran Offline</TableHead>
+                      <TableHead className="whitespace-nowrap">Omzet / Bulan</TableHead>
+                      <TableHead className="whitespace-nowrap">Kesulitan Usaha</TableHead>
+                      <TableHead className="whitespace-nowrap">Pelatihan Diharapkan</TableHead>
+                      <TableHead className="whitespace-nowrap">Akses Permodalan</TableHead>
+                      <TableHead className="whitespace-nowrap">Info Ekspor</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {registrants.map((r) => (
-                      <TableRow key={r.registration_id}>
-                        <TableCell className="whitespace-nowrap">{format(new Date(r.registered_at), "dd/MM/yy HH:mm")}</TableCell>
-                        <TableCell>{r.workshop_title}</TableCell>
-                        <TableCell>{r.profile?.full_name || "-"}</TableCell>
-                        <TableCell>{r.profile?.nik || "-"}</TableCell>
-                        <TableCell>{r.profile?.phone_number || "-"}</TableCell>
-                        <TableCell>{r.profile?.nama_usaha || "-"}</TableCell>
-                        <TableCell>{r.profile?.bidang_usaha || "-"}</TableCell>
-                        <TableCell>{[r.profile?.desa, r.profile?.kecamatan].filter(Boolean).join(", ") || "-"}</TableCell>
-                        <TableCell>{r.status}</TableCell>
-                      </TableRow>
-                    ))}
+                    {registrants.map((r) => {
+                      const p = r.profile || {};
+                      const fmt = (v: any) => {
+                        if (v == null || v === "") return "-";
+                        if (Array.isArray(v)) return v.length ? v.join(", ") : "-";
+                        return String(v);
+                      };
+                      return (
+                        <TableRow key={r.registration_id}>
+                          <TableCell className="whitespace-nowrap">{format(new Date(r.registered_at), "dd/MM/yy HH:mm")}</TableCell>
+                          <TableCell className="whitespace-nowrap">{r.workshop_title}</TableCell>
+                          <TableCell className="whitespace-nowrap">{r.status}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.full_name)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.nik)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.bidang_usaha)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.phone_number)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.email)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.desa)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.kecamatan)}</TableCell>
+                          <TableCell className="max-w-[260px] whitespace-normal">{fmt(p.alamat_lengkap)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.nama_usaha)}</TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">{fmt(p.produk_dihasilkan)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.tahun_berdiri)}</TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">{fmt(p.perizinan)}</TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">{fmt(p.bantuan_fasilitasi)}</TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">{fmt(p.kegiatan_dinas_pernah)}</TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">{fmt(p.kegiatan_dinas_sekarang)}</TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">{fmt(p.paguyuban)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.modal_awal)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.jumlah_tenaga_kerja)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.kapasitas_produksi)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.harga_per_unit)}</TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">{fmt(p.media_pemasaran_online)}</TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">{fmt(p.daerah_pemasaran_offline)}</TableCell>
+                          <TableCell className="whitespace-nowrap">{fmt(p.jumlah_penjualan)}</TableCell>
+                          <TableCell className="max-w-[260px] whitespace-normal">{fmt(p.kesulitan_usaha)}</TableCell>
+                          <TableCell className="max-w-[260px] whitespace-normal">{fmt(p.pelatihan_diharapkan)}</TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">{fmt(p.akses_permodalan)}</TableCell>
+                          <TableCell className="max-w-[220px] whitespace-normal">{fmt(p.info_ekspor)}</TableCell>
+                        </TableRow>
+                      );
+                    })}
                     {registrants.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                        <TableCell colSpan={30} className="text-center py-8 text-muted-foreground">
                           Belum ada pendaftar.
                         </TableCell>
                       </TableRow>
