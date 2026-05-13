@@ -164,13 +164,13 @@ const Auth = () => {
             kegiatan_dinas_pernah: signup.kegiatanDinasPernah,
             kegiatan_dinas_sekarang: signup.kegiatanDinasSekarang,
             paguyuban: signup.paguyuban,
-            modal_awal: signup.modalAwal,
+            modal_awal: signup.modalAwal.replace(/\./g, ""),
             jumlah_tenaga_kerja: signup.jumlahTenagaKerja,
             kapasitas_produksi: signup.kapasitasProduksi,
-            harga_per_unit: signup.hargaPerUnit,
+            harga_per_unit: signup.hargaPerUnit.replace(/\./g, ""),
             media_pemasaran_online: signup.mediaPemasaranOnline,
             daerah_pemasaran_offline: signup.daerahPemasaranOffline,
-            jumlah_penjualan: signup.jumlahPenjualan,
+            jumlah_penjualan: signup.jumlahPenjualan.replace(/\./g, ""),
             kesulitan_usaha: signup.kesulitanUsaha,
             pelatihan_diharapkan: signup.pelatihanDiharapkan,
             akses_permodalan: signup.aksesPermodalan,
@@ -272,6 +272,24 @@ const Auth = () => {
           disabled={isLoading}
         />
       )}
+    </div>
+  );
+
+  const rupiahField = (label: string, key: keyof typeof initialSignup, placeholder = "Rp.") => (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <Input
+        type="text"
+        inputMode="numeric"
+        value={signup[key] as string}
+        onChange={(e) => {
+          const raw = e.target.value.replace(/\D/g, "");
+          const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+          updateSignup(key, formatted);
+        }}
+        placeholder={placeholder}
+        disabled={isLoading}
+      />
     </div>
   );
 
@@ -410,10 +428,10 @@ const Auth = () => {
                 {field("Kegiatan Dinas yang Pernah Diikuti (Pelatihan, Pameran, dll)", "kegiatanDinasPernah", "textarea")}
                 {field("Kegiatan Dinas yang Diikuti Sekarang", "kegiatanDinasSekarang", "textarea")}
                 {field("Paguyuban yang Diikuti Sekarang", "paguyuban")}
-                {field("Modal Awal / Aset (tidak termasuk tanah dan bangunan)", "modalAwal", "text", "Rp.")}
+                {rupiahField("Modal Awal / Aset (tidak termasuk tanah dan bangunan)", "modalAwal", "Rp.")}
                 {field("Jumlah Tenaga Kerja", "jumlahTenagaKerja", "text", "Orang")}
                 {field("Kapasitas Produksi Per Bulan", "kapasitasProduksi", "text", "Pcs / unit / Kg")}
-                {field("Harga per Unit / Pcs / Kg", "hargaPerUnit", "text", "Rp.")}
+                {rupiahField("Harga per Unit / Pcs / Kg", "hargaPerUnit", "Rp.")}
 
                 <div className="space-y-2">
                   <Label>Media Pemasaran Online</Label>
@@ -431,7 +449,7 @@ const Auth = () => {
                 </div>
 
                 {field("Daerah Pemasaran Offline (sebutkan)", "daerahPemasaranOffline", "textarea")}
-                {field("Jumlah Penjualan / Omzet per Bulan", "jumlahPenjualan")}
+                {rupiahField("Jumlah Penjualan / Omzet per Bulan", "jumlahPenjualan", "Rp.")}
                 {field("Kesulitan yang Dihadapi dalam Menjalankan Usaha", "kesulitanUsaha", "textarea")}
                 {field("Pelatihan dan Fasilitasi yang Diharapkan", "pelatihanDiharapkan", "textarea")}
                 {field("Akses Permodalan / Pembiayaan yang Sudah Pernah Didapat (misal KUR)", "aksesPermodalan", "textarea")}
