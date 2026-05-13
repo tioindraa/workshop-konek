@@ -275,21 +275,27 @@ const Auth = () => {
     </div>
   );
 
-  const rupiahField = (label: string, key: keyof typeof initialSignup, placeholder = "Rp.") => (
+  const rupiahField = (label: string, key: keyof typeof initialSignup, placeholder = "0") => (
     <div className="space-y-2">
       <Label>{label}</Label>
-      <Input
-        type="text"
-        inputMode="numeric"
-        value={signup[key] as string}
-        onChange={(e) => {
-          const raw = e.target.value.replace(/\D/g, "");
-          const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-          updateSignup(key, formatted);
-        }}
-        placeholder={placeholder}
-        disabled={isLoading}
-      />
+      <div className="flex items-stretch">
+        <span className="inline-flex items-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
+          Rp.
+        </span>
+        <Input
+          type="text"
+          inputMode="numeric"
+          className="rounded-l-none flex-1"
+          value={signup[key] as string}
+          onChange={(e) => {
+            const raw = e.target.value.replace(/\D/g, "");
+            const formatted = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            updateSignup(key, formatted);
+          }}
+          placeholder={placeholder}
+          disabled={isLoading}
+        />
+      </div>
     </div>
   );
 
